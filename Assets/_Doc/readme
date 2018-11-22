@@ -1,0 +1,17 @@
+﻿一。设置公司名称和项目名称
+Company Name:xxx(公司名称)
+Product Name:xxx(项目名称)--包名显示
+二。准备图标资源
+1024x1024
+三。设置横屏，竖屏
+Portrait
+Landscape
+四。设置splash
+五。设置编辑选项。ProjectSettings->Editor->(Version Control:Visible Meta Files,AssetSerialization:Force Text)
+五。注册ios，android开发者账号。(keystore,mobileprovision)
+六。设置Bundle Identifier
+AOT Compilation Options (nrgctx-trampolines=8192,nimt-trampolines=8192,ntrampolines=4096)
+七。版本号规则
+八。mono加密
+九。git分支管理
+

@@ -1,0 +1,47 @@
+﻿git学习官网地址：https://git-scm.com/book/zh/v2
+一。创建远程仓库（Mac系统)
+1.创建git用户
+  System Preferences->Users & Groups->点+号添加git账户，基于Standard
+2.设置远程访问
+  logout当前账户，使用git账户登录,在System Preferences->Sharing中，勾选Remote Login
+3.下载安装gitosis
+  ~git$git clone git://github.com/res0nat0r/gitosis.git
+  cd gitosis/
+  sudo python setup.py install
+4.制作ssh rsa公钥,切换到client端
+  cd ~
+  ssh-keygen -t rsa
+  cd .ssh
+  cp id_rsa.pub /tmp/yourname.pub
+5.使用ssh公钥初始化gitosis
+  git$cd gitosis
+  git$sudo -H -u git gitosis-init < /tmp/yourname.pub
+  将 authorizd_keys 稍做修改，用文本编辑器打开它，删除里面的"command="gitosis-serve yourname",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty " 这一行：
+  对 post-update 赋予可写权限，以便 client 端可以提交更改。
+  git$sudo chmod 775 /Users/git/repositories//gitosis-admin.git/hooks/post-update
+  修改git账户的PATH路径
+  git$touch ~/.bashrc
+  git$echo PATH=/usr/local/bin:/usr/local/git/bin:\$PATH > .bashrc
+  git$echo export PATH >> .bashrc
+6.修改成ssh登录
+>cd /etc
+>chmod 666 sshd_config 
+>vim sshd_config
+编辑如下：
+修改#PermitRootLogin yes为PermitRootLogin no
+移除下面几条语句前面的#
+#RSAAuthentication yes
+#PubkeyAuthentication yes 
+#AuthorizedKeysFile     .ssh/authorized_keys          
+#PasswordAuthentication no
+#PermitEmptyPasswords no
+最后修改#UserPAM yes为UsePAM no
+参考
+二。创建本地仓库
+cd ~
+cd repositories
+mkdir test.git
+cd test.git
+git --bare init
+git clone git@ip:repositories/test.git
+三。添加ignore文件

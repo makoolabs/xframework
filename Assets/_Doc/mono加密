@@ -1,0 +1,72 @@
+﻿一。下载对应Unity版本的Mono
+https://github.com/Unity-Technologies/mono
+打开地址后页面向下拉，找到Unity大版本号下面的链接点进去(注意不选mbe版本)
+点进去后点右边的Clone or download后出现Download ZIP，点击下载即可
+二。下载android-ndk
+https://dl.google.com/android/repository/android-ndk-r10e-darwin-x86_64.zip
+三。配置android-ndk变量
+将下载的android-ndk解压，解压后的目录为xxx/android-ndk-r10e
+打开.bash_profile 加入
+export ANDROID_NDK_ROOT=xxx/android-ndk-r10e
+export PATH=$ANDROID_NDK_ROOT=xxx/android-ndk-r10e
+保存关闭后
+source .bash_profile
+在终端测试
+~ ndk-build
+ndroid NDK: Could not find application project directory !
+Android NDK: Please define the NDK_PROJECT_PATH variable to point to it.
+/Users/apple/android-ndk-r10e/build/core/build-local.mk:143: *** Android NDK: Aborting    .  Stop.
+输出上面的文字，代表配置成功。
+四。配置Mono
+将下载的Mono解压，用编辑工具打开整个文件夹修改如下几个文件：
+1. external/buildscripts/build_runtime_android.sh
+    在export ANDROID_PLATFORM=android-9下面加上
+        export ANDROID_NDK_ROOT=xxx/android-ndk-r10e//手动引导NDK路径
+    （根据perl ${BUILDSCRIPTSDIR}/PrepareAndroidSDK.pl -ndk=r10e -env=envsetup.sh && source envsetup.sh这里得知要下的ndk版本为r10e)
+   找到KRAIT_PATCH_PATH="${CWD}/../../android_krait_signal_handler/build"这里改成
+           KRAIT_PATCH_PATH="${CWD}/android_krait_signal_handler/build" (这个文件夹是从git自动下载，修改后下载到根目录，后面会用)
+    找到-fpic -g -funwind-tables \这行改成
+            -fpic -O2 -funwind-tables \  压缩级别
+     注释掉 
+#clean_build "$CCFLAGS_ARMv5_CPU" "$LDFLAGS_ARMv5" "$OUTDIR/armv5"
+#clean_build "$CCFLAGS_ARMv6_VFP" "$LDFLAGS_ARMv5" "$OUTDIR/armv6_vfp"
+2.external/buildscripts/build_runtime_android_x86.sh
+  在export ANDROID_PLATFORM=android-9下面加上
+      export ANDROID_NDK_ROOT=xxx/android-ndk-r10e
+找到-fpic -g \这行改成 -fpic \  //即-g去掉
+3.mono/metadata/image.c
+找到mono_image_open_from_data_with_name方法
+在第一行加入
+if(strstr(name,"Assembly-CSharp.dll")){
+     data[0]-=1;//自定义的加密算法
+}
+4.external/buildscripts/PrepareAndroidSDK.pm
+找到my @curr_arr = split(' ',$current);修改成
+        my @curr_arr = split(/\-|\s/,$current)  //不修改会识别不出r10e版本，会编译一次下载一次
+5.android_krait_signal_handler/build.pl
+   将PrepareAndroidSDK::GetAndroidSDK(undef,undef,"xxx");//xxx是不同的ndk版本
+   修改成PrepareAndroidSDK::GetAndroidSDK(undef,undef,"r10e");
+6.android_krait_signal_handler/PrepareAndroidSDK.pm
+   将修改后的external/buildscripts/PrepareAndroidSDK.pm，覆盖掉这个文件夹下的文件
+五。执行脚本
+将external/buildscripts/build_runtime_android.sh拖动终端执行//如果提示xxx permission就输入sudo
+六。遇到的问题及解决方案(如果上面能顺序编译通过，下面不要修改）：
+1.找不到android_krait_signal_handler这个文件夹。
+  先运行一次external/buildscripts/build_runtime_android.sh脚本，启用git下载，会出现这个文件夹
+2.build.pl 错误（没错误不要改）
+修改#!/usr/bin/env perl 为#!/usr/bin/perl
+3.Can't locate File/Copy/Recursive.pm
+安装这个模块
+sudo cpan install File::Copy::Recursive
+或修改PrepareAndroidSDK.pm中的
+use lib("./perl.lib");
+改成绝对目录
+use lib("xxx/mono根目录/perl_lib")
+4.找不到autoconf等
+  安装brew install autoconf automake libtool pkg-config
+5.clang错误
+ 打开 android_krait_signal_handler/build/jni/Application.mk
+修改NDK_TOOLCHAIN_VERSION := clang
+改成NDK_TOOLCHAIN_VERSION := 4.8
+6.其它
+必须在当前根目录里运行，或将external/buildscripts/build_runtime_android.sh拷到根目录运行，不要进到buildscripts中运行。
