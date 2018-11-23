@@ -906,7 +906,7 @@ PlayerSettings:
   cloudServicesEnabled:
     UNet: 1
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 3
+  apiCompatibilityLevel: 2
   cloudProjectId: d2b8ada4-ce7c-4e88-8541-c3c2aefd34be
   projectName: template
   organizationId: coffis

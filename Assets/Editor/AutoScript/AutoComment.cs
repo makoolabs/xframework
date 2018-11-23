@@ -3,8 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 public class AutoComment : UnityEditor.AssetModificationProcessor{
-	private static string COMMENT = "/*NEVER BUG*/\n";
-	public static void OnWillCreateAsset(string path){
+	private static string COMMENT = @"/*** 
+ *     ____        ____   ____          ____    __________     ____      _____
+ *    |....|      |....|  \...\        /.../  /..._____...\   |....|    /..../
+ *    |....|      |....|   \...\      /.../  /.../     \___\  |....|   /..../
+ *    |....|______|....|    \...\____/.../   |...|            |....|__/..../
+ *    |....|......|....|     \....  ..../    \...\________    |....|....../
+ *    |....|______|....|      \_..  .._/      \________...\   |....|__....|
+ *    |....|      |....|        |....|       ___       \...\  |....|  \....\
+ *    |....|      |....|        |....|      \...\      |...|  |....|   \....\
+ *    |....|      |....|        |....|       \...\____/.../   |....|    \....\
+ *    |____|      |____|        |____|        \ _________/    |____|     \ ___\
+ *                               Never            Bug
+ */
+";
+public static void OnWillCreateAsset(string path){
 		path = path.Replace(".meta","");
 		var index = path.LastIndexOf(".");
 		var file = path.Substring(index);
