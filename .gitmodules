@@ -1,0 +1,3 @@
+[submodule "Assets/XUI"]
+	path = Assets/XUI
+	url = git@github.com:makoolabs/XUI.git
